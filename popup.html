@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Auto Refresh</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<style>
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f5f7fa;
+  color: #333;
+  width: 300px;
+  padding: 20px;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+input[type="number"], input[type="text"] {
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+.radio-group label {
+  font-size: 13px;
+  display: block;
+}
+
+#countdown {
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 10px;
+}
+#stop {
+  background-color: #e74c3c;
+}
+
+#stop:hover {
+  background-color: #c0392b;
+}
+
+
+</style>
+<body>
+  <div class="container">
+    <h2>Auto Refresh</h2>
+    
+    <label>Fixed Refresh Time (seconds):</label>
+    <input type="number" id="fixedTime" placeholder="Example: 10">
+
+    <label>Random Refresh (min - max seconds):</label>
+    <input type="number" id="minTime" placeholder="Min">
+    <input type="number" id="maxTime" placeholder="Max">
+
+    <label>Text to Watch:</label>
+    <input type="text" id="watchText" placeholder="Enter text...">
+
+    <div class="radio-group">
+      <label><input type="radio" name="watchMode" value="appear"> Show notification when appears</label>
+      <label><input type="radio" name="watchMode" value="disappear"> Show notification when disappears</label>
+    </div>
+
+    <button id="start">Start</button>
+	<button id="stop">Stop</button>
+
+    <div id="countdown">Countdown: --</div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
+
+

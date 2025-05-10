@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Auto Refresh & Text Watcher",
+  "version": "1.0",
+  "description": "Auto-refresh with smart timer and DOM text watcher",
+  "permissions": ["tabs", "scripting", "notifications",  "activeTab",  "storage"],
+  "host_permissions": ["<all_urls>"],
+  "web_accessible_resources": [
+  {
+    "resources": ["sounds/notify.mp3"],
+    "matches": ["<all_urls>"]
+  }
+],
+  "action": {
+    "default_popup": "popup.html",
+	 "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}
