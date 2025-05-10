@@ -26,5 +26,6 @@
   },
   "background": {
     "service_worker": "background.js"
-  }
+  },
+  "author": "Adnan Arslangiray - adnanarslangiray@borusan.com"
 }
