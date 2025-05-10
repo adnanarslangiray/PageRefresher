@@ -92,7 +92,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 document.addEventListener('DOMContentLoaded', function () {
   // chrome.storage.local'dan veriyi al
-      const singleDelay = document.getElementById('fixedTime');
+    const singleDelay = document.getElementById('fixedTime');
 	  const minDelay = document.getElementById('minTime');
 	  const maxDelay = document.getElementById('maxTime');
 	  const keyword = document.getElementById('watchText');
@@ -117,4 +117,23 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
   
+});
+
+document.getElementById('clearButton').addEventListener('click', async function () {
+
+  document.getElementById('fixedTime').value = '';
+  document.getElementById('minTime').value = '';
+  document.getElementById('maxTime').value = '';
+  document.getElementById('watchText').value = '';
+  
+ 
+  const radios = document.getElementsByName('watchMode');
+  radios.forEach(r => r.checked = false);
+
+  
+  const countdownDisplay = document.getElementById('countdown');
+  if (countdownDisplay) countdownDisplay.textContent = '';
+
+  await chrome.storage.local.clear();
+
 });

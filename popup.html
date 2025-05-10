@@ -60,12 +60,29 @@ button:hover {
   background-color: #c0392b;
 }
 
+.clear-button {
+    background-color: #f1c40f; 
+    color: #000;               
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s;
+  }
+
+  .clear-button:hover {
+    background-color: #f39c12; 
+  }
+
 
 </style>
 <body>
   <div class="container">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <h2>Auto Refresh</h2>
-    
+
     <label>Fixed Refresh Time (seconds):</label>
     <input type="number" id="fixedTime" placeholder="Example: 10">
 
@@ -81,8 +98,9 @@ button:hover {
       <label><input type="radio" name="watchMode" value="disappear"> Show notification when disappears</label>
     </div>
 
-    <button id="start">Start</button>
-	<button id="stop">Stop</button>
+    <button id="start" class="control-button"><i class="fas fa-play"></i> Start</button>
+    <button id="stop" class="control-button"><i class="fas fa-stop"></i> Stop</button>
+    <button id="clearButton" class="clear-button"><i class="fas fa-broom"></i> Clear</button>
 
     <div id="countdown">Countdown: --</div>
   </div>
