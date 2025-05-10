@@ -76,6 +76,28 @@ button:hover {
     background-color: #f39c12; 
   }
 
+  .control-button {
+    font-size: 14px;
+    padding: 10px 16px;
+    margin: 5px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    color: white;
+    background-color: #2ecc71; /* Başlangıçta yeşil (Start) */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s;
+  }
+
+  .control-button:hover {
+    filter: brightness(90%);
+  }
+
+  .control-button i {
+    margin-right: 8px;
+  }
+
 
 </style>
 <body>
@@ -98,8 +120,8 @@ button:hover {
       <label><input type="radio" name="watchMode" value="disappear"> Show notification when disappears</label>
     </div>
 
-    <button id="start" class="control-button"><i class="fas fa-play"></i> Start</button>
-    <button id="stop" class="control-button"><i class="fas fa-stop"></i> Stop</button>
+
+    <button id="toggleButton" class="control-button"> <i class="fas fa-play"></i> Start</button>
     <button id="clearButton" class="clear-button"><i class="fas fa-broom"></i> Clear</button>
 
     <div id="countdown">Countdown: --</div>

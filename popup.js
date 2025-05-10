@@ -1,33 +1,38 @@
 let shouldRun = false;
-
-const startButton = document.getElementById('start');
-const stopButton = document.getElementById('stop');
+const toggleButton = document.getElementById('toggleButton');
+const clearButton = document.getElementById('clearButton');
 const countdownEl = document.getElementById('countdown');
 
-startButton.addEventListener('click', async () => {
-  if (shouldRun) return;
+const inputIds = ['fixedTime', 'minTime', 'maxTime', 'watchText'];
+const inputs = Object.fromEntries(inputIds.map(id => [id, document.getElementById(id)]));
+const radioInputs = document.getElementsByName('watchMode');
+
+toggleButton.addEventListener('click', async () => {
+  if (shouldRun) {
+    stopRefreshing();
+    return;
+  }
 
   shouldRun = true;
+  setToggleButtonState(true);
 
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   chrome.tabs.update(tab.id, { active: true });
 
-  const fixedTime = parseInt(document.getElementById('fixedTime').value);
-  const minTime = parseInt(document.getElementById('minTime').value);
-  const maxTime = parseInt(document.getElementById('maxTime').value);
-  const watchText = document.getElementById('watchText').value.trim();
-  const watchMode = document.querySelector('input[name="watchMode"]:checked')?.value;
+  const fixedTime = parseInt(inputs.fixedTime.value);
+  const minTime = parseInt(inputs.minTime.value);
+  const maxTime = parseInt(inputs.maxTime.value);
+  const watchText = inputs.watchText.value.trim();
+  const watchMode = [...radioInputs].find(r => r.checked)?.value;
 
-  // Verileri sakla
+  // Kaydet
   chrome.storage.local.set({
     fixedTimeVal: fixedTime,
     minTimeVal: minTime,
     maxTimeVal: maxTime,
-	watchTextVal : watchText,
-	watchModeVal : watchMode
-  }, function () {
-    console.log('Değerler kaydedildi');
-  });
+    watchTextVal: watchText,
+    watchModeVal: watchMode
+  }, () => console.log('Değerler kaydedildi'));
 
   while (shouldRun) {
     const delay = fixedTime || (minTime && maxTime ? getRandomInt(minTime, maxTime) : null);
@@ -38,7 +43,6 @@ startButton.addEventListener('click', async () => {
     }
 
     await countdown(delay);
-
     if (!shouldRun) break;
 
     if (watchText && watchMode) {
@@ -59,17 +63,19 @@ startButton.addEventListener('click', async () => {
     }
 
     chrome.tabs.reload(tab.id);
-    await new Promise(resolve => setTimeout(resolve, 1000)); // reload sonrası kısa bekleme
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }
-});
-
-stopButton.addEventListener('click', () => {
-  stopRefreshing();
 });
 
 function stopRefreshing() {
   shouldRun = false;
   countdownEl.textContent = "Stopped.";
+  setToggleButtonState(false);
+}
+
+function setToggleButtonState(isRunning) {
+  toggleButton.innerHTML = isRunning ? '<i class="fas fa-stop"></i> Stop' : '<i class="fas fa-play"></i> Start';
+  toggleButton.style.backgroundColor = isRunning ? '#e74c3c' : '#2ecc71';
 }
 
 function getRandomInt(min, max) {
@@ -83,57 +89,32 @@ async function countdown(seconds) {
   }
 }
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message) => {
   if (message.type === 'play-sound') {
     const audio = new Audio(chrome.runtime.getURL("sounds/notify.mp3"));
-    audio.play().catch((err) => console.error("Ses çalma hatası:", err));
+    audio.play().catch(err => console.error("Ses çalma hatası:", err));
   }
 });
 
-document.addEventListener('DOMContentLoaded', function () {
-  // chrome.storage.local'dan veriyi al
-    const singleDelay = document.getElementById('fixedTime');
-	  const minDelay = document.getElementById('minTime');
-	  const maxDelay = document.getElementById('maxTime');
-	  const keyword = document.getElementById('watchText');
-	  
-	  
-    chrome.storage.local.get([
-    'fixedTimeVal',
-    'minTimeVal',
-    'maxTimeVal',
-    'watchTextVal',
-    'watchModeVal'
-	
-  ], function (data) {
-    if (data.fixedTimeVal) singleDelay.value = data.fixedTimeVal;
-    if (data.minTimeVal) minDelay.value = data.minTimeVal;
-    if (data.maxTimeVal) maxDelay.value = data.maxTimeVal;
-    if (data.watchTextVal) keyword.value = data.watchTextVal;
-	
+document.addEventListener('DOMContentLoaded', () => {
+  chrome.storage.local.get([
+    'fixedTimeVal', 'minTimeVal', 'maxTimeVal', 'watchTextVal', 'watchModeVal'
+  ], data => {
+    inputs.fixedTime.value = data.fixedTimeVal || '';
+    inputs.minTime.value = data.minTimeVal || '';
+    inputs.maxTime.value = data.maxTimeVal || '';
+    inputs.watchText.value = data.watchTextVal || '';
+
     if (data.watchModeVal) {
-      const radioToCheck = document.querySelector(`input[name="watchMode"][value="${data.watchModeVal}"]`);
+      const radioToCheck = [...radioInputs].find(r => r.value === data.watchModeVal);
       if (radioToCheck) radioToCheck.checked = true;
     }
   });
-  
 });
 
-document.getElementById('clearButton').addEventListener('click', async function () {
-
-  document.getElementById('fixedTime').value = '';
-  document.getElementById('minTime').value = '';
-  document.getElementById('maxTime').value = '';
-  document.getElementById('watchText').value = '';
-  
- 
-  const radios = document.getElementsByName('watchMode');
-  radios.forEach(r => r.checked = false);
-
-  
-  const countdownDisplay = document.getElementById('countdown');
-  if (countdownDisplay) countdownDisplay.textContent = '';
-
+clearButton.addEventListener('click', async () => {
+  Object.values(inputs).forEach(input => input.value = '');
+  [...radioInputs].forEach(r => r.checked = false);
+  countdownEl.textContent = '';
   await chrome.storage.local.clear();
-
 });
