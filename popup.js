@@ -1,7 +1,10 @@
+
 let shouldRun = false;
+let telegramToken, chatId;
 const toggleButton = document.getElementById('toggleButton');
 const clearButton = document.getElementById('clearButton');
 const countdownEl = document.getElementById('countdown');
+const telegramNotificationsCB = document.getElementById('telegramNotifications');
 
 const inputIds = ['fixedTime', 'minTime', 'maxTime', 'watchText'];
 const inputs = Object.fromEntries(inputIds.map(id => [id, document.getElementById(id)]));
@@ -46,21 +49,31 @@ toggleButton.addEventListener('click', async () => {
     if (!shouldRun) break;
 
     if (watchText && watchMode) {
-      chrome.scripting.executeScript({
+      const [{ result: shouldNotify }] = await chrome.scripting.executeScript({
         target: { tabId: tab.id },
         func: (text, mode) => {
           const found = document.body.innerText.includes(text);
-          const shouldNotify = (mode === 'appear' && found) || (mode === 'disappear' && !found);
-          if (shouldNotify) {
-            chrome.runtime.sendMessage({
-              type: 'notify',
-              text: `Text "${text}" ${mode === 'appear' ? 'appeared' : 'disappeared'}`
-            });
-          }
+          return (mode === 'appear' && found) || (mode === 'disappear' && !found);
         },
         args: [watchText, watchMode]
       });
+    
+      if (shouldNotify) {
+        const url = tab.url;
+        const message = `Text "${watchText}" ${watchMode === 'appear' ? 'appeared' : 'disappeared'} on the page.\nURL: ${url}`;
+    
+        if (telegramNotificationsCB?.checked) {
+          console.log("Sending Telegram notification...");
+          await sendTelegramNotification(message);
+        }
+    
+        chrome.runtime.sendMessage({
+          type: 'notify',
+          text: message
+        });
+      }
     }
+    
 
     chrome.tabs.reload(tab.id);
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -110,7 +123,21 @@ document.addEventListener('DOMContentLoaded', () => {
       if (radioToCheck) radioToCheck.checked = true;
     }
   });
-});
+
+
+  fetch(chrome.runtime.getURL('config.json'))
+    .then(response => response.json())
+    .then(config => {
+      console.log("config dosyasının içeriği"); // config dosyasının içeriği
+      console.log(config); // config dosyasının içeriği
+      telegramToken = config.telegramToken;
+      chatId = config.chatId;
+    })
+    .catch(error => {
+      console.error('Config file could not be loaded:', error);
+    });
+
+},() => console.log('Değerler getirildi'));
 
 clearButton.addEventListener('click', async () => {
   Object.values(inputs).forEach(input => input.value = '');
@@ -118,3 +145,27 @@ clearButton.addEventListener('click', async () => {
   countdownEl.textContent = '';
   await chrome.storage.local.clear();
 });
+
+// telegram 
+
+async function sendTelegramNotification(text) {
+  const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text
+    })
+  });
+
+  const result = await response.json();
+  if (!result.ok) {
+    console.error("Telegram API Hatası:", result);
+  } else {
+    console.log("Telegram mesajı gönderildi:", result);
+  }
+}
