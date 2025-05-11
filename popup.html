@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Auto Refresh</title>
+  <title>Auto Refresher</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <style>
@@ -97,13 +97,44 @@ button:hover {
   .control-button i {
     margin-right: 8px;
   }
+  #telegramFields {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+#telegramFields input {
+  width: calc(100% - 16px); 
+  padding: 8px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  box-sizing: border-box; 
+}
+
+
+label {
+  font-family: 'Roboto', sans-serif; 
+  font-weight: 300; 
+  font-size: 16px; 
+  color: #333; 
+  margin-bottom: 5px;
+  display: block;
+  transition: color 0.3s ease; 
+}
+
+label:hover {
+  color: #007bff;
+}
 
 
 </style>
 <body>
   <div class="container">
    
-    <h2>Auto Refresh</h2>
+    <h2>Auto Refresher</h2>
 
     <label>Fixed Refresh Time (seconds):</label>
     <input type="number" id="fixedTime" placeholder="Example: 10">
@@ -130,12 +161,17 @@ button:hover {
   <label>
     <input type="checkbox" id="telegramNotifications"> Enable Telegram notifications
   </label>
-  
+
+  <div id="telegramFields" style="display: none;">
+    <input type="text" id="telegramToken" placeholder="Enter Telegram Bot Token">
+    
+    <input type="text" id="telegramChatId" placeholder="Enter Telegram Chat ID">
+  </div>
 
   <script src="popup.js"></script>
 </body>
 <footer style="font-size: 10px; text-align: center; margin-top: 10px;">
-  © 2025 Geliştirici: Adnan Arslangiray - adnanarslangiray@borusan.com
+  © 2025 Creator: Adnan Arslangiray - adnan.arslangiray@gmail.com
 </footer>
 
 </html>
