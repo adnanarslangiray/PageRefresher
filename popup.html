@@ -77,9 +77,7 @@ button:hover {
   }
 
   .control-button {
-    font-size: 14px;
     padding: 10px 16px;
-    margin: 5px;
     border-radius: 8px;
     font-weight: bold;
     cursor: pointer;
@@ -129,6 +127,13 @@ label:hover {
   color: #007bff;
 }
 
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px; /* Butonlar arası boşluk */
+  margin-top: 10px;
+}
+
 
 </style>
 <body>
@@ -147,15 +152,18 @@ label:hover {
     <input type="text" id="watchText" placeholder="Enter text...">
 
     <div class="radio-group">
+      <label><input type="radio" name="watchMode" value="ignore" checked> Ignore text condition</label>
       <label><input type="radio" name="watchMode" value="appear"> Show notification when appears</label>
       <label><input type="radio" name="watchMode" value="disappear"> Show notification when disappears</label>
     </div>
 
-
+    <div class="button-group">
     <button id="toggleButton" class="control-button"> <i class="fas fa-play"></i> Start</button>
     <button id="clearButton" class="clear-button"><i class="fas fa-broom"></i> Clear</button>
+    </div>
 
-    <div id="countdown">Countdown: --</div>
+    <div id="countdown" style="display: none;">Countdown: --</div>
+    </br>
   </div>
 
   <label>
