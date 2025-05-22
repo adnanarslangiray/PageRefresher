@@ -84,9 +84,8 @@ async function startProcess() {
         }
 
         try {
-          chrome.runtime.sendMessage({ type: 'notify', text: message });
+          showChromeNotification(message);
         } catch (e) {
-          console.warn('Popup kapalı olabilir.');
         }
       }
     }
@@ -166,6 +165,20 @@ async function sendTelegramNotification(token, chatId, text) {
   } catch (err) {
     console.error("Telegram bağlantı hatası:", err);
   }
+}
+
+
+function showChromeNotification(message) {
+  chrome.notifications.create({
+    type: "basic",
+    iconUrl: "icons/icon16.png", // manifest.json'da tanımlı ikon
+    title: "Takip Bildirimi",
+    message: message
+  }, (notificationId) => {
+    if (chrome.runtime.lastError) {
+      console.warn("Bildirim gösterilemedi:", chrome.runtime.lastError.message);
+    }
+  });
 }
 
 
