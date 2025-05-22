@@ -1,5 +1,5 @@
 const toggleButton = document.getElementById('toggleButton');
-const countdownEl = document.getElementById('countdown');
+// const countdownEl = document.getElementById('countdown');
 const clearButton = document.getElementById('clearButton');
 
 const telegramToken = document.getElementById('telegramToken');
@@ -67,7 +67,7 @@ clearButton.addEventListener('click', () => {
   telegramChatId.value = '';
   telegramNotificationsCB.checked = false;
   telegramFields.style.display = 'none';
-  countdownEl.textContent = '';
+  // countdownEl.textContent = '';
 
   chrome.runtime.sendMessage({ action: 'stop' });
   chrome.storage.local.clear();

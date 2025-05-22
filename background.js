@@ -1,22 +1,32 @@
+
 let shouldRun = false;
 let countdownInterval;
-let currentTabId;
+let currentTabId = null;
 let timeoutId = null;
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'start') {
     shouldRun = true;
-    startProcess();
+
+    // İlk kez başlatıldığında aktif sekmeyi al
+    if (!currentTabId) {
+      chrome.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
+        currentTabId = tab.id;
+        startProcess();
+      });
+    } else {
+      startProcess();
+    }
+
   } else if (message.action === 'stop') {
     shouldRun = false;
-    clearInterval(countdownInterval);
-    chrome.action.setBadgeText({ text: '' });
+    stopProcess();
+    currentTabId = null;
   }
 });
 
 async function startProcess() {
-
-  stopProcess();
+  stopProcess(); // önceki işlemi temizle
 
   const {
     fixedTimeVal,
@@ -32,20 +42,30 @@ async function startProcess() {
     'telegramTokenVal', 'telegramChatIdVal'
   ]);
 
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  currentTabId = tab.id;
+  if (!currentTabId) return;
+
+  // tab bilgilerini güncel al (URL'ye ihtiyacımız olabilir)
+  const tab = await chrome.tabs.get(currentTabId);
+
+  // Sistem sekmesi kontrolü
+  if (!tab || tab.url.startsWith('chrome://') || tab.url.startsWith('edge://')) {
+    console.warn('Sistem sekmesi geçersiz. Yeniden denenecek.');
+    await waitForValidTab(currentTabId); // sekme yeniden yüklenene kadar bekle
+    if (shouldRun) startProcess();
+    return;
+  }
 
   const delay = fixedTimeVal || (minTimeVal && maxTimeVal ? getRandomInt(minTimeVal, maxTimeVal) : null);
   if (!delay) return;
 
-  countdown(delay); // Geri sayım başlat
+  countdown(delay);
 
-  timeoutId  = setTimeout(async () => {
+  timeoutId = setTimeout(async () => {
     if (!shouldRun) return;
 
     chrome.tabs.reload(currentTabId);
-
     await waitForTabLoad(currentTabId);
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     if (watchTextVal && watchModeVal) {
       const [{ result: shouldNotify }] = await chrome.scripting.executeScript({
@@ -63,11 +83,15 @@ async function startProcess() {
           await sendTelegramNotification(telegramTokenVal, telegramChatIdVal, message);
         }
 
-        chrome.runtime.sendMessage({ type: 'notify', text: message });
+        try {
+          chrome.runtime.sendMessage({ type: 'notify', text: message });
+        } catch (e) {
+          console.warn('Popup kapalı olabilir.');
+        }
       }
     }
 
-    if (shouldRun) startProcess(); // tekrar başla
+    if (shouldRun) startProcess(); // döngü
   }, delay * 1000);
 }
 
@@ -86,6 +110,26 @@ function countdown(seconds) {
     counter--;
   }, 1000);
 }
+
+function waitForValidTab(tabId) {
+  return new Promise(resolve => {
+    const check = async () => {
+      try {
+        const tab = await chrome.tabs.get(tabId);
+        if (tab && !tab.url.startsWith('chrome://') && !tab.url.startsWith('edge://')) {
+          resolve();
+        } else {
+          setTimeout(check, 1000);
+        }
+      } catch (e) {
+        setTimeout(check, 1000);
+      }
+    };
+    check();
+  });
+}
+
+
 
 function waitForTabLoad(tabId) {
   return new Promise(resolve => {
@@ -123,3 +167,5 @@ async function sendTelegramNotification(token, chatId, text) {
     console.error("Telegram bağlantı hatası:", err);
   }
 }
+
+
